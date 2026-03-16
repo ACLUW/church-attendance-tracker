@@ -1,0 +1,52 @@
+body {
+  font-family: Arial, sans-serif;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 0 10px;
+}
+
+h1, h2, h3 {
+  text-align: center;
+}
+
+.service-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.service-info label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+}
+
+#counters {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.counter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.counter-row span.label {
+  flex: 1;
+}
+
+.counter-row button {
+  width: 32px;
+  height: 32px;
+  font-size: 1.2rem;
+}
+
+.counter-row span.value {
+  width: 40px;
+  text-align: center;
+  font-weight: bold;
+}
