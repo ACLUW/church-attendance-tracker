@@ -1,0 +1,9 @@
+- Record counts for:
+- Men
+- Women
+- Teenagers
+- Children
+- Newcomers
+- See totals for that service
+- View past services (history list)
+- Export/download data to local dedicated system storage
