@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Church Attendance Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Church Attendance Tracker</h1>
+
+  <div class="service-info">
+    <label>
+      Service Date:
+      <input type="date" id="serviceDate" />
+    </label>
+    <label>
+      Service Name:
+      <input type="text" id="serviceName" placeholder="e.g. Sunday 1st Service" />
+    </label>
+    <button id="loadService">Load / Create Service</button>
+  </div>
+
+  <h2>Counts</h2>
+  <div id="counters">
+    <!-- Each row: label, -, number, + -->
+  </div>
+
+  <h3>Summary</h3>
+  <p>Total: <span id="totalCount">0</span></p>
+
+  <button id="saveService">Save Service</button>
+
+  <h2>Saved Services</h2>
+  <ul id="serviceList"></ul>
+
+  <button id="exportData">Export All Data</button>
+
+  <script src="app.js"></script>
+</body>
+</html>
