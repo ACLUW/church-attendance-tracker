@@ -2,38 +2,74 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Church Attendance Tracker</title>
+  <title>JFFI Attendance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Church Attendance Tracker</h1>
+  <header class="hero">
+    <div class="logo-ring">
+      <img src="logo.jpg" alt="JFFI logo" class="logo" />
+    </div>
+    <div class="hero-copy">
+      <p class="eyebrow">JFFI Church</p>
+      <h1>Attendance Tracker</h1>
+      <p class="slogan">Changing lives &amp; raising champions</p>
+      <p class="lede">Capture attendance for every service with clarity, speed, and a touch of JFFI energy.</p>
+    </div>
+  </header>
 
-  <div class="service-info">
-    <label>
-      Service Date:
-      <input type="date" id="serviceDate" />
-    </label>
-    <label>
-      Service Name:
-      <input type="text" id="serviceName" placeholder="e.g. Sunday 1st Service" />
-    </label>
-    <button id="loadService">Load / Create Service</button>
-  </div>
+  <main class="shell">
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <p class="section-eyebrow">Service setup</p>
+          <h2>Plan today’s counts</h2>
+        </div>
+        <button class="ghost" id="exportData">Export All</button>
+      </div>
 
-  <h2>Counts</h2>
-  <div id="counters">
-    <!-- Each row: label, -, number, + -->
-  </div>
+      <div class="service-info">
+        <label>
+          Service Date
+          <input type="date" id="serviceDate" />
+        </label>
+        <label>
+          Service Name
+          <input type="text" id="serviceName" placeholder="e.g. Sunday 1st Service" />
+        </label>
+        <button id="loadService">Load / Create Service</button>
+      </div>
+    </section>
 
-  <h3>Summary</h3>
-  <p>Total: <span id="totalCount">0</span></p>
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <p class="section-eyebrow">Live counts</p>
+          <h2>Who’s in the room</h2>
+        </div>
+        <div class="summary-chip">Total <span id="totalCount">0</span></div>
+      </div>
+      <div id="counters" class="counter-grid">
+        <!-- Counters injected by JS -->
+      </div>
+      <div class="actions">
+        <button id="saveService">Save Service</button>
+      </div>
+    </section>
 
-  <button id="saveService">Save Service</button>
-
-  <h2>Saved Services</h2>
-  <ul id="serviceList"></ul>
-
-  <button id="exportData">Export All Data</button>
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <p class="section-eyebrow">History</p>
+          <h2>Saved services</h2>
+        </div>
+      </div>
+      <ul id="serviceList" class="service-list"></ul>
+    </section>
+  </main>
 
   <script src="app.js"></script>
 </body>
