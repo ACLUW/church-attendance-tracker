@@ -6,6 +6,7 @@ let currentCounts = {};
 let statusTextEl;
 let saveButton;
 let exportButton;
+let emailButton;
 
 function init() {
   buildCounters();
@@ -13,10 +14,12 @@ function init() {
   statusTextEl = document.getElementById("statusText");
   saveButton = document.getElementById("saveService");
   exportButton = document.getElementById("exportData");
+  emailButton = document.getElementById("sendEmail");
 
   document.getElementById("loadService").addEventListener("click", loadOrCreateService);
   saveButton.addEventListener("click", saveCurrentService);
   exportButton.addEventListener("click", exportData);
+  emailButton.addEventListener("click", sendViaEmail);
 
   toggleSave(false);
   loadServiceList();
@@ -66,7 +69,7 @@ function changeCount(category, delta) {
   if (!currentServiceKey) {
     setStatus("Counting in quick mode. Load/create a service to save these numbers.", "warning");
   } else {
-    setStatus(`Tracking: ${currentServiceKey.replace("__", " — ")}`, "ok");
+    setStatus(`Tracking: ${currentServiceKey.replace("__", " - ")}`, "ok");
   }
 }
 
@@ -141,24 +144,77 @@ function loadServiceList() {
   });
 }
 
-function exportData() {
+function sendViaEmail() {
+  const email = document.getElementById("emailTo").value.trim();
+  if (!email) {
+    alert("Add a Gmail address first.");
+    return;
+  }
+  const dataset = collectData();
+  if (!dataset.length) {
+    alert("No services to export yet.");
+    return;
+  }
+  const csv = buildCsv(dataset);
+  const mailto = [
+    "mailto:" + encodeURIComponent(email),
+    "?subject=" + encodeURIComponent("JFFI Attendance Export (CSV)"),
+    "&body=" + encodeURIComponent(
+      "Attached below is the CSV export. Copy and paste into Gmail if the attachment is not included automatically.\n\n" + csv
+    ),
+  ].join("");
+  window.location.href = mailto;
+  setStatus("Opened Gmail with CSV in the email body.", "ok");
+}
+
+function collectData() {
   const keys = Object.keys(localStorage).filter(k => k.includes("__"));
-  const data = keys.map(key => {
+  return keys.map(key => {
     const [date, name] = key.split("__");
     const counts = JSON.parse(localStorage.getItem(key));
     return { date, name, counts };
   });
+}
 
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+function buildCsv(data) {
+  const headers = ["Date", "Service Name", "Category", "Count"];
+  const rows = [headers.join(",")];
+
+  data.forEach(entry => {
+    CATEGORIES.forEach(cat => {
+      const count = entry.counts?.[cat] ?? 0;
+      rows.push([entry.date, entry.name, cat, count].map(sanitizeCsv).join(","));
+    });
+  });
+
+  return rows.join("\n");
+}
+
+function sanitizeCsv(value) {
+  if (value == null) return "";
+  const str = String(value);
+  return /[\",\n]/.test(str) ? `"${str.replace(/\"/g, '""')}"` : str;
+}
+
+// Export to CSV for Android download friendliness
+function exportData() {
+  const data = collectData();
+  if (!data.length) {
+    alert("No services saved yet.");
+    return;
+  }
+
+  const csv = buildCsv(data);
+  const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
 
   const a = document.createElement("a");
   a.href = url;
-  a.download = "church_attendance_export.json";
+  a.download = "jffi_attendance_export.csv";
   a.click();
 
   URL.revokeObjectURL(url);
-  setStatus("Data exported (JSON).", "ok");
+  setStatus("CSV downloaded to device.", "ok");
 }
 
 function setStatus(message, tone = "idle") {
