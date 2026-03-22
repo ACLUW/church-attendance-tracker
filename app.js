@@ -201,15 +201,24 @@ function collectData() {
 }
 
 function buildCsv(data) {
-  const headers = ["Date", "Service Name", "Preacher", "Category", "Count", "Total"];
-  const rows = [headers.join(",")];
+  const rows = [];
 
   data.forEach(entry => {
     const total = CATEGORIES.reduce((sum, cat) => sum + (entry.counts?.[cat] ?? 0), 0);
+
+    // Service heading (single occurrence)
+    rows.push(["Service", "Date", "Preacher", "Total"].map(sanitizeCsv).join(","));
+    rows.push([entry.name, entry.date, entry.preacher || "", total].map(sanitizeCsv).join(","));
+
+    // Category breakdown
+    rows.push(["Category", "Count"].join(","));
     CATEGORIES.forEach(cat => {
       const count = entry.counts?.[cat] ?? 0;
-      rows.push([entry.date, entry.name, entry.preacher || "", cat, count, total].map(sanitizeCsv).join(","));
+      rows.push([cat, count].map(sanitizeCsv).join(","));
     });
+
+    // Spacer row between services
+    rows.push("");
   });
 
   return rows.join("\n");
