@@ -3,6 +3,7 @@ const CATEGORIES = ["Men", "Women", "Teenagers", "Children", "Newcomers"];
 
 let currentServiceKey = null;
 let currentCounts = {};
+let currentPreacher = "";
 let statusTextEl;
 let saveButton;
 let exportButton;
@@ -81,6 +82,7 @@ function updateTotal() {
 function loadOrCreateService() {
   const date = document.getElementById("serviceDate").value;
   const name = document.getElementById("serviceName").value.trim();
+  const preacher = document.getElementById("preacherName").value.trim();
 
   if (!date || !name) {
     alert("Please enter both date and service name.");
@@ -91,11 +93,19 @@ function loadOrCreateService() {
   const stored = localStorage.getItem(currentServiceKey);
 
   if (stored) {
-    currentCounts = JSON.parse(stored);
+    const parsed = JSON.parse(stored);
+    if (parsed && typeof parsed === "object" && parsed.counts) {
+      currentCounts = parsed.counts;
+      currentPreacher = parsed.preacher || preacher;
+    } else {
+      currentCounts = parsed || {};
+      currentPreacher = preacher;
+    }
     setStatus(`Loaded: ${name} (${date})`, "ok");
   } else {
     currentCounts = {};
     CATEGORIES.forEach(cat => currentCounts[cat] = 0);
+    currentPreacher = preacher;
     setStatus(`New service ready: ${name} (${date})`, "ok");
   }
 
@@ -103,6 +113,7 @@ function loadOrCreateService() {
     document.getElementById(`value-${cat}`).textContent = currentCounts[cat] || 0;
   });
   updateTotal();
+  document.getElementById("preacherName").value = currentPreacher || "";
   toggleSave(true);
 }
 
@@ -112,7 +123,9 @@ function saveCurrentService() {
     return;
   }
 
-  localStorage.setItem(currentServiceKey, JSON.stringify(currentCounts));
+  const preacher = document.getElementById("preacherName").value.trim();
+  currentPreacher = preacher;
+  localStorage.setItem(currentServiceKey, JSON.stringify({ counts: currentCounts, preacher }));
   setStatus("Service saved. Great job!", "ok");
   loadServiceList();
 }
@@ -130,9 +143,17 @@ function loadServiceList() {
     li.textContent = `${date} - ${name}`;
     li.addEventListener("click", () => {
       currentServiceKey = key;
-      currentCounts = JSON.parse(localStorage.getItem(key));
+      const parsed = JSON.parse(localStorage.getItem(key));
+      if (parsed && typeof parsed === "object" && parsed.counts) {
+        currentCounts = parsed.counts;
+        currentPreacher = parsed.preacher || "";
+      } else {
+        currentCounts = parsed || {};
+        currentPreacher = "";
+      }
       document.getElementById("serviceDate").value = date;
       document.getElementById("serviceName").value = name;
+      document.getElementById("preacherName").value = currentPreacher || "";
       CATEGORIES.forEach(cat => {
         document.getElementById(`value-${cat}`).textContent = currentCounts[cat] || 0;
       });
@@ -171,19 +192,23 @@ function collectData() {
   const keys = Object.keys(localStorage).filter(k => k.includes("__"));
   return keys.map(key => {
     const [date, name] = key.split("__");
-    const counts = JSON.parse(localStorage.getItem(key));
-    return { date, name, counts };
+    const parsed = JSON.parse(localStorage.getItem(key));
+    if (parsed && typeof parsed === "object" && parsed.counts) {
+      return { date, name, counts: parsed.counts, preacher: parsed.preacher || "" };
+    }
+    return { date, name, counts: parsed || {}, preacher: "" };
   });
 }
 
 function buildCsv(data) {
-  const headers = ["Date", "Service Name", "Category", "Count"];
+  const headers = ["Date", "Service Name", "Preacher", "Category", "Count", "Total"];
   const rows = [headers.join(",")];
 
   data.forEach(entry => {
+    const total = CATEGORIES.reduce((sum, cat) => sum + (entry.counts?.[cat] ?? 0), 0);
     CATEGORIES.forEach(cat => {
       const count = entry.counts?.[cat] ?? 0;
-      rows.push([entry.date, entry.name, cat, count].map(sanitizeCsv).join(","));
+      rows.push([entry.date, entry.name, entry.preacher || "", cat, count, total].map(sanitizeCsv).join(","));
     });
   });
 
